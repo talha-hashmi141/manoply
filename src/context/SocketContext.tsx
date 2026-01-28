@@ -23,18 +23,12 @@ interface SocketContextType {
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
-// Get the server URL from environment or default to localhost:3001 for dev
+// Get the server URL - same origin since Socket.io runs with Next.js
 const getServerUrl = () => {
-  // Check for environment variable first (for production)
-  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
-    return process.env.NEXT_PUBLIC_SOCKET_URL;
-  }
-  // Default to localhost:3001 for local development
   if (typeof window !== 'undefined') {
-    const { protocol, hostname } = window.location;
-    return `${protocol}//${hostname}:3001`;
+    return window.location.origin;
   }
-  return 'http://localhost:3001';
+  return '';
 };
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
