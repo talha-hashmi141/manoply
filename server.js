@@ -2,7 +2,7 @@ const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const next = require('next');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = '0.0.0.0';
@@ -83,7 +83,7 @@ app.prepare().then(() => {
 
     socket.on('room:create', ({ roomName, playerName, initialBalance }) => {
       const roomId = generateRoomId();
-      const playerId = uuidv4();
+      const playerId = randomUUID();
       
       const player = {
         id: playerId,
@@ -126,7 +126,7 @@ app.prepare().then(() => {
       }
 
       const { avatar, color } = getAvailableAvatarAndColor(room);
-      const playerId = uuidv4();
+      const playerId = randomUUID();
       
       const player = {
         id: playerId,
@@ -175,7 +175,7 @@ app.prepare().then(() => {
       receiver.balance += amount;
 
       const transaction = {
-        id: uuidv4(),
+        id: randomUUID(),
         type: 'transfer',
         fromId: sender.id,
         toId: receiver.id,
@@ -212,7 +212,7 @@ app.prepare().then(() => {
       }
 
       const transaction = {
-        id: uuidv4(),
+        id: randomUUID(),
         type: 'request',
         fromId: payer.id,
         toId: requester.id,
