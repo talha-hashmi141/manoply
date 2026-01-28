@@ -70,11 +70,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setError(null);
     });
 
-    newSocket.on('room:updated', (updatedRoom) => {
+    newSocket.on('room:updated', (updatedRoom: Room) => {
       setRoom(updatedRoom);
       setCurrentPlayer(prev => {
         if (!prev) return null;
-        const updated = updatedRoom.players.find(p => p.id === prev.id);
+        const updated = updatedRoom.players.find((p: Player) => p.id === prev.id);
         return updated || prev;
       });
     });
