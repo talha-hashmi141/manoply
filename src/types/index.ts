@@ -49,6 +49,7 @@ export type ClientToServerEvents = {
   'transaction:transfer': (data: { toPlayerId: string; amount: number; message?: string }) => void;
   'transaction:request': (data: { fromPlayerId: string; amount: number; message?: string }) => void;
   'transaction:respond': (data: { transactionId: string; accept: boolean }) => void;
+  'balance:edit': (data: { playerId: string; newBalance: number }) => void;
 };
 
 // Avatar options

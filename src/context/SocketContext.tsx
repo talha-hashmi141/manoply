@@ -18,6 +18,7 @@ interface SocketContextType {
   transferMoney: (toPlayerId: string, amount: number, message?: string) => void;
   requestMoney: (fromPlayerId: string, amount: number, message?: string) => void;
   respondToRequest: (transactionId: string, accept: boolean) => void;
+  editBalance: (playerId: string, newBalance: number) => void;
   clearError: () => void;
 }
 
@@ -154,6 +155,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   }, [socket]);
 
+  const editBalance = useCallback((playerId: string, newBalance: number) => {
+    if (socket) {
+      socket.emit('balance:edit', { playerId, newBalance });
+    }
+  }, [socket]);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -174,6 +181,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         transferMoney,
         requestMoney,
         respondToRequest,
+        editBalance,
         clearError,
       }}
     >

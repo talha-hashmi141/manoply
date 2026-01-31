@@ -277,6 +277,41 @@ app.prepare().then(() => {
       console.log(`Request ${accept ? 'accepted' : 'rejected'}: ${payer.name} -> ${requester.name}: $${transaction.amount}`);
     });
 
+    socket.on('balance:edit', ({ playerId, newBalance }) => {
+      const playerInfo = getPlayerInfo(socket.id);
+      if (!playerInfo) {
+        socket.emit('room:error', 'Not in a room');
+        return;
+      }
+
+      const { room, player: editor } = playerInfo;
+
+      // Only host can edit balances
+      if (room.hostId !== editor.id) {
+        socket.emit('room:error', 'Only the host can edit balances');
+        return;
+      }
+
+      const targetPlayer = room.players.find(p => p.id === playerId);
+      if (!targetPlayer) {
+        socket.emit('room:error', 'Player not found');
+        return;
+      }
+
+      if (newBalance < 0) {
+        socket.emit('room:error', 'Balance cannot be negative');
+        return;
+      }
+
+      const oldBalance = targetPlayer.balance;
+      targetPlayer.balance = newBalance;
+
+      io.to(room.id).emit('room:updated', room);
+      io.to(room.id).emit('balance:updated', { playerId, balance: newBalance });
+
+      console.log(`Balance edit by host: ${targetPlayer.name} $${oldBalance} -> $${newBalance}`);
+    });
+
     socket.on('room:leave', () => {
       handleDisconnect();
     });

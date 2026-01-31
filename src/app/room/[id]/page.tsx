@@ -7,6 +7,7 @@ import PlayerCard from '@/components/PlayerCard';
 import TransactionModal from '@/components/TransactionModal';
 import RequestNotification from '@/components/RequestNotification';
 import TransactionHistory from '@/components/TransactionHistory';
+import EditBalanceModal from '@/components/EditBalanceModal';
 import type { Player } from '@/types';
 
 export default function RoomPage() {
@@ -22,6 +23,7 @@ export default function RoomPage() {
     transferMoney,
     requestMoney,
     respondToRequest,
+    editBalance,
     clearError,
   } = useSocket();
 
@@ -30,6 +32,8 @@ export default function RoomPage() {
   const [targetPlayer, setTargetPlayer] = useState<Player | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editTargetPlayer, setEditTargetPlayer] = useState<Player | null>(null);
 
   // Redirect if no room
   useEffect(() => {
@@ -59,6 +63,15 @@ export default function RoomPage() {
     setTargetPlayer(player);
     setModalType('request');
     setModalOpen(true);
+  };
+
+  const handleEdit = (player: Player) => {
+    setEditTargetPlayer(player);
+    setEditModalOpen(true);
+  };
+
+  const handleEditSubmit = (playerId: string, newBalance: number) => {
+    editBalance(playerId, newBalance);
   };
 
   const handleModalSubmit = (amount: number, message?: string) => {
@@ -166,12 +179,25 @@ export default function RoomPage() {
               </div>
               <div>
                 <p className="text-slate-400 text-sm">Your Balance</p>
-                <p className="text-4xl font-black text-emerald-400 money-glow">
-                  ${currentPlayer.balance.toLocaleString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-4xl font-black text-emerald-400 money-glow">
+                    ${currentPlayer.balance.toLocaleString()}
+                  </p>
+                  {room.hostId === currentPlayer.id && (
+                    <button
+                      onClick={() => handleEdit(currentPlayer)}
+                      className="p-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 rounded-lg transition-all"
+                      title="Edit your balance"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <div className="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium">
                 {currentPlayer.name}
@@ -241,8 +267,10 @@ export default function RoomPage() {
                   player={player}
                   isCurrentUser={false}
                   isHost={room.hostId === player.id}
+                  isViewerHost={room.hostId === currentPlayer.id}
                   onTransfer={() => handleTransfer(player)}
                   onRequest={() => handleRequest(player)}
+                  onEdit={() => handleEdit(player)}
                 />
               ))}
             </div>
@@ -296,6 +324,14 @@ export default function RoomPage() {
         targetPlayer={targetPlayer}
         currentBalance={currentPlayer.balance}
         onSubmit={handleModalSubmit}
+      />
+
+      {/* Edit Balance Modal (Host only) */}
+      <EditBalanceModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        player={editTargetPlayer}
+        onSubmit={handleEditSubmit}
       />
     </main>
   );

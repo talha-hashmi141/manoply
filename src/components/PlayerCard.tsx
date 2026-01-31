@@ -7,16 +7,20 @@ interface PlayerCardProps {
   player: Player;
   isCurrentUser: boolean;
   isHost: boolean;
+  isViewerHost?: boolean;
   onTransfer?: () => void;
   onRequest?: () => void;
+  onEdit?: () => void;
 }
 
 export default function PlayerCard({
   player,
   isCurrentUser,
   isHost,
+  isViewerHost,
   onTransfer,
   onRequest,
+  onEdit,
 }: PlayerCardProps) {
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -79,7 +83,7 @@ export default function PlayerCard({
           <h3 className="text-lg font-bold text-white truncate">
             {player.name}
           </h3>
-          {isCurrentUser && (
+          {(isCurrentUser || isViewerHost) && (
             <div className="flex items-baseline gap-1 mt-1">
               <span
                 className="text-2xl font-black tracking-tight"
@@ -87,9 +91,12 @@ export default function PlayerCard({
               >
                 {formatMoney(player.balance)}
               </span>
+              {isViewerHost && !isCurrentUser && (
+                <span className="text-xs text-slate-500 ml-1">(visible to host)</span>
+              )}
             </div>
           )}
-          {!isCurrentUser && (
+          {!isCurrentUser && !isViewerHost && (
             <div className="flex items-center gap-1 mt-1 text-slate-500">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -121,6 +128,17 @@ export default function PlayerCard({
             </svg>
             Request
           </button>
+          {isViewerHost && (
+            <button
+              onClick={onEdit}
+              className="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 font-semibold py-2 px-3 rounded-xl transition-all duration-200 text-sm flex items-center justify-center"
+              title="Edit balance"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          )}
         </div>
       )}
     </div>
